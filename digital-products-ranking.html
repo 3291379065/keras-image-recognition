@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2025 数字产品前七名互动排名</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #141b34;
+      --text: #e9edff;
+      --muted: #a9b3d9;
+      --accent: #6f8cff;
+      --good: #29d391;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #131d45 0, var(--bg) 45%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container { max-width: 980px; margin: 0 auto; }
+    h1 { margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+    button {
+      border: 1px solid #2e3a6d;
+      background: #1a2450;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    button.active { background: var(--accent); border-color: var(--accent); }
+    .list { display: grid; gap: 12px; }
+    .item {
+      background: rgba(20, 27, 52, 0.95);
+      border: 1px solid #2a3464;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .left { display: flex; align-items: center; gap: 12px; }
+    .rank {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: grid; place-items: center; background: #24306b; font-weight: 700;
+    }
+    .name { font-size: 1.05rem; font-weight: 700; }
+    .score { color: var(--good); font-weight: 700; }
+    .desc { margin: 10px 0 12px; color: var(--muted); line-height: 1.55; }
+    .bar {
+      height: 10px; border-radius: 99px; background: #252f58; overflow: hidden;
+    }
+    .fill { height: 100%; background: linear-gradient(90deg, #5f7dff, #7fa8ff); }
+    a { color: #8dc0ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .hint { margin-top: 16px; color: #9ea8cf; font-size: .92rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>2025 年表现最好的 7 种数字产品（互动排名）</h1>
+    <p class="sub">点击按钮可切换排序：<strong>今年表现</strong> 或 <strong>明年潜力</strong>。所有链接均为可免费开店/发布数字产品的网站，并避免 Amazon、Etsy 及其他传统第三方市场。</p>
+
+    <div class="controls">
+      <button id="btn-this" class="active">按 2025 表现排序</button>
+      <button id="btn-next">按 2026 潜力排序</button>
+    </div>
+
+    <div id="list" class="list"></div>
+
+    <p class="hint">说明：分数为综合趋势分（需求增长、复购潜力、制作门槛、AI 放大效应）。可按你的细分领域继续微调。</p>
+  </div>
+
+  <script>
+    const products = [
+      {
+        name: "AI 工作流模板包（Notion/自动化脚本）",
+        thisYear: 96,
+        nextYear: 98,
+        desc: "企业与个人都在降本增效，标准化模板 + 自动化 SOP 的需求持续走强。",
+        site: "https://payhip.com"
+      },
+      {
+        name: "短视频与广告素材包（可商用）",
+        thisYear: 94,
+        nextYear: 93,
+        desc: "品牌内容密度上升，现成可编辑素材帮助创作者快速出片、持续复购。",
+        site: "https://ko-fi.com"
+      },
+      {
+        name: "在线课程（微课程 / 专项训练营）",
+        thisYear: 92,
+        nextYear: 95,
+        desc: "“结果导向 + 短周期”课程更受欢迎，知识付费从大课走向可执行小课。",
+        site: "https://www.podia.com"
+      },
+      {
+        name: "电子书与指南（实操型）",
+        thisYear: 89,
+        nextYear: 90,
+        desc: "低成本入门产品，适合作为流量入口并与高价服务或会员体系联动。",
+        site: "https://payhip.com"
+      },
+      {
+        name: "设计资源（字体、图标、UI Kit）",
+        thisYear: 90,
+        nextYear: 91,
+        desc: "开发和设计协作提速，轻量资源包可在多个项目复用，生命周期较长。",
+        site: "https://sell.app"
+      },
+      {
+        name: "会员订阅内容（社群资料库 / 周报）",
+        thisYear: 88,
+        nextYear: 94,
+        desc: "一次性售卖转向持续订阅，稳定现金流和高留存成为增长关键。",
+        site: "https://substack.com"
+      },
+      {
+        name: "数字规划工具（预算表、学习系统、习惯追踪器）",
+        thisYear: 87,
+        nextYear: 92,
+        desc: "个人生产力市场扩大，结构化模板在学生、职场人和自由职业者中渗透率高。",
+        site: "https://www.fourthwall.com"
+      }
+    ];
+
+    const list = document.getElementById('list');
+    const btnThis = document.getElementById('btn-this');
+    const btnNext = document.getElementById('btn-next');
+
+    function render(key) {
+      const sorted = [...products].sort((a, b) => b[key] - a[key]);
+      list.innerHTML = sorted.map((p, i) => `
+        <article class="item">
+          <div class="row">
+            <div class="left">
+              <div class="rank">${i + 1}</div>
+              <div>
+                <div class="name">${p.name}</div>
+                <small>免费网站：<a href="${p.site}" target="_blank" rel="noopener noreferrer">${p.site}</a></small>
+              </div>
+            </div>
+            <div class="score">${p[key]} 分</div>
+          </div>
+          <p class="desc">${p.desc}</p>
+          <div class="bar"><div class="fill" style="width:${p[key]}%"></div></div>
+        </article>
+      `).join('');
+    }
+
+    btnThis.addEventListener('click', () => {
+      btnThis.classList.add('active');
+      btnNext.classList.remove('active');
+      render('thisYear');
+    });
+
+    btnNext.addEventListener('click', () => {
+      btnNext.classList.add('active');
+      btnThis.classList.remove('active');
+      render('nextYear');
+    });
+
+    render('thisYear');
+  </script>
+</body>
+</html>
